@@ -1,3 +1,5 @@
-# password-generator
+# Password Generator
 
-https://codepen.io/zinge/pen/BaBLrXx
+A Pen created on CodePen.io. Original URL: [https://codepen.io/zinge/pen/BaBLrXx](https://codepen.io/zinge/pen/BaBLrXx).
+
+
