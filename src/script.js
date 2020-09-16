@@ -50,7 +50,7 @@ class Form {
   }
 
   onSubmitHandler(callback) {
-    this._listener = (e) => {
+    const listener = (e) => {
       e.preventDefault();
       const elements = this._form.elements;
       const results = {};
@@ -66,7 +66,7 @@ class Form {
       if (callback && typeof callback === "function") callback(results);
     };
 
-    this._form.addEventListener("submit", this._listener);
+    this._form.addEventListener("submit", listener);
 
     return this;
   }
