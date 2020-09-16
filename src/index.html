@@ -1,12 +1,8 @@
 <div class="container">
-  <div class="container__options">
+  <form action="#" name="params" class="container__options">
     <div class="container__row">
       <label for="passwordLength">Password Length</label>
-      <select
-        name="passwordLength"
-        id="passwordLength"
-        class="rounded"
-      >
+      <select name="passwordLength" id="passwordLength" class="rounded">
         <option value="4">4</option>
         <option value="6">6</option>
         <option value="10">10</option>
@@ -16,11 +12,7 @@
     </div>
     <div class="container__row">
       <label for="passwordsCount">Passwords Count</label>
-      <select
-        name="passwordsCount"
-        id="passwordsCount"
-        class="rounded"
-      >
+      <select name="passwordsCount" id="passwordsCount" class="rounded">
         <option value="3">3</option>
         <option value="5">5</option>
         <option value="10">10</option>
@@ -31,9 +23,9 @@
       <input type="checkbox" id="withSymbols" name="withSymbols" class="rounded">
     </div>
     <div class="container__row">
-      <input type="button" value="Generate" id="generateButton" class="rounded" />
-      <input type="button" value="Clear" id="clearButton" class="rounded" />
+      <button type="submit" class="rounded">Generate</button>
+      <button type="reset" class="rounded">Clear</button>
     </div>
-  </div>
+  </form>
   <ul id="container__passwords"></ul>
 </div>

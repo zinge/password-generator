@@ -16,7 +16,7 @@
   padding: 6px 0;
   border-bottom: 1px dashed;
   align-items: center;
-  
+
   &:first-child {
     padding-top: 8px;
   }
@@ -37,7 +37,7 @@ option:last-child.rounded {
   border-bottom-left-radius: 4px;
 }
 
-input[type=checkbox].rounded {
+input[type="checkbox"].rounded {
   transform: scale(1.5);
 }
 
