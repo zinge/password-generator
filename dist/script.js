@@ -3,81 +3,116 @@ const PASSWORD_UPPER_CASE = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // without: ['I', 'O']
 const PASSWORD_NUMBERS = "123456789"; // without: ['0']
 const SYMBOLS = "!@#$%^&*()_+-=[]{}'"; // without: ['|']
 
-class Select {
+class Form {
   constructor(nodeID, initial) {
-    this._node = document.getElementById(nodeID);
+    this._form = document.forms[nodeID];
     this._initial = initial;
 
-    this.reset();
+    this.setInitial(this._initial);
+  }
+
+  setInitial(initial) {
+    for (const [key, value] of Object.entries(initial)) {
+      const node = this._form.elements[key];
+
+      this.isCheckbox(node)
+        ? this.setCheckboxValue(node, value)
+        : this.setTextValue(node, value);
+    }
   }
 
   reset() {
-    this._node.value = this._initial;
+    this.setInitial(this._initial);
   }
 
-  get value() {
-    return this._node.value;
-  }
-}
-
-class Checkbox {
-  constructor(nodeID, initial) {
-    this._node = document.getElementById(nodeID);
-    this._initial = initial;
-
-    this.reset();
+  setTextValue(node, value) {
+    node.value = value;
   }
 
-  reset() {
-    this._node.checked = this._initial;
+  getTextValue(node) {
+    return node.value;
   }
 
-  get value() {
-    return this._node.checked;
-  }
-}
-
-class Button {
-  constructor(nodeID) {
-    this._node = document.getElementById(nodeID);
+  setCheckboxValue(node, value) {
+    node.checked = value;
   }
 
-  onClickHandler(listener) {
-    this._node.addEventListener("click", listener);
+  getCheckboxValue(node) {
+    return node.checked;
+  }
+
+  isCheckbox(node) {
+    return node.type.toLowerCase() === "checkbox";
+  }
+
+  isButton(node) {
+    return node.tagName.toLowerCase() === "button";
+  }
+
+  onSubmitHandler(callback) {
+    this._listener = (e) => {
+      e.preventDefault();
+      const elements = this._form.elements;
+      const results = {};
+
+      for (const field of elements) {
+        if (!this.isButton(field)) {
+          results[field.id] = this.isCheckbox(field)
+            ? this.getCheckboxValue(field)
+            : this.getTextValue(field);
+        }
+      }
+
+      if (callback && typeof callback === "function") callback(results);
+    };
+
+    this._form.addEventListener("submit", this._listener);
+
+    return this;
+  }
+
+  onResetHandler(callback) {
+    const listener = (e) => {
+      e.preventDefault();
+
+      this.reset();
+      if (callback && typeof callback === "function") callback();
+    };
+
+    this._form.addEventListener("reset", listener);
+
+    return this;
   }
 }
 
 class Generator {
-  constructor(length, count, withSymbols) {
-    this._length = length;
-    this._count = count;
-    this._withSymbols = withSymbols;
-  }
+  run(params) {
+    const result = [];
 
-  run() {
-    this.clearPasswords();
+    for (let i = 0; i < params.passwordsCount; i++) {
+      const password = this.getPassword(
+        params.passwordLength,
+        params.withSymbols
+      );
 
-    for (let i = 0; i < this._count.value; i++) {
-      const password = this.getPassword();
-
-      this._passwords.push({
+      result.push({
         value: password,
-        entropy: this.getEntropy(password),
+        entropy: this.getEntropy(password)
       });
     }
 
-    this._passwordsContainer.render(this._passwords);
+    return result;
   }
 
   getEntropy(password) {
-    let n = 0,
-      uniqueCharacters = password.length;
+    let n = 0;
+    const uniqueCharacters = password.length;
 
     let hasLowerCase = false,
       hasUpperCase = false,
       hasNumbers = false;
 
-    for (let i = 0; i < password.length; i++) {
+    for (let i = 0; i < uniqueCharacters; i++) {
       const character = password.charAt(i).valueOf();
 
       if (!hasLowerCase && PASSWORD_LOWER_CASE.includes(character)) {
@@ -101,13 +136,13 @@ class Generator {
     return passwordEntropy == 0 && !password ? 1 : passwordEntropy;
   }
 
-  getPassword() {
+  getPassword(length, withSymbols) {
     let charset = `${PASSWORD_LOWER_CASE}${PASSWORD_UPPER_CASE}${PASSWORD_NUMBERS}${
-        this._withSymbols.value ? SYMBOLS : ""
+        withSymbols ? SYMBOLS : ""
       }`,
       result = "";
 
-    for (let i = 0; i < this._length.value; i++) {
+    for (let i = 0; i < length; i++) {
       const char = this.getChar(charset);
       charset = charset.replace(char, "");
       result += char;
@@ -120,24 +155,6 @@ class Generator {
     const match = str.charAt(Math.floor(Math.random() * str.length));
 
     return match || getChar(str);
-  }
-
-  clearPasswords() {
-    this._passwords = [];
-  }
-
-  reset() {
-    this.clearPasswords();
-    this._length.reset();
-    this._count.reset();
-    this._withSymbols.reset();
-    this._passwordsContainer.clear();
-  }
-
-  setPasswordsContainer(passwordsContainer) {
-    this._passwordsContainer = passwordsContainer;
-
-    return this;
   }
 }
 
@@ -193,22 +210,19 @@ class Passwords {
 class App {
   start() {
     const passwords = new Passwords("container__passwords");
+    const generator = new Generator();
 
-    const passwordLength = new Select("passwordLength", 10);
-    const passwordsCount = new Select("passwordsCount", 3);
-    const withSymbols = new Checkbox("withSymbols", false);
-
-    const generator = new Generator(
-      passwordLength,
-      passwordsCount,
-      withSymbols
-    ).setPasswordsContainer(passwords);
-
-    const generateButton = new Button("generateButton");
-    generateButton.onClickHandler(() => generator.run());
-
-    const clearButton = new Button("clearButton");
-    clearButton.onClickHandler(() => generator.reset());
+    new Form("params", {
+      passwordLength: 10,
+      passwordsCount: 3,
+      withSymbols: false
+    })
+      .onSubmitHandler((values) => {
+        passwords.render(generator.run(values));
+      })
+      .onResetHandler(() => {
+        passwords.clear();
+      });
   }
 }
 

@@ -38,7 +38,7 @@ option:last-child.rounded {
   border-bottom-left-radius: 4px;
 }
 
-input[type=checkbox].rounded {
+input[type="checkbox"].rounded {
   -webkit-transform: scale(1.5);
           transform: scale(1.5);
 }
